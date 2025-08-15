@@ -20,3 +20,11 @@ let getComputerChoice = () => {
 for (let i = 0; i < 5; i++) {
   console.log(getComputerChoice());
 }
+
+// Prompt the user for their choice of "Rock, Scissors, or Paper" then 
+// return the value of their choice
+let getHumanChoice = () => {
+  return prompt("Rock, Scissors, or Paper?");
+};
+
+console.log(getHumanChoice());
