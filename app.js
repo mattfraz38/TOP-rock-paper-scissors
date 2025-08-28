@@ -18,7 +18,7 @@ const gameTypes = document.querySelectorAll("#gameType");
 const playSingleGameButton = document.querySelector("#singlePlay");
 const playBestOfFiveGameButton = document.querySelector("#bestOfFive");
 const choices = document.querySelectorAll("#rps-choices button");
-const playAgainButton = document.querySelector("#playAgain");
+const playAgainButton = document.querySelector("#playAgain button");
 const rpsChoiceQuestion = document.querySelector("#rps-choices h2");
 const rpsChoiceDIV = document.querySelector("#rps-choices");
 
@@ -175,17 +175,18 @@ function playRound(computerChoice, userChoice) {
   const showWinner = document.createElement("h2");
   showWinner.textContent = "";
 
-  if (computerChoice > userChoice) {
-    showWinner.textContent = "Computer Wins!";
-    console.log("Computer Wins!");
-    computerScore += 1;
-  } else if (userChoice > computerChoice) {
+  if (userChoice === computerChoice) {
+    showWinner.textContent = "It's a tie!";
+  } else if (
+    (userChoice === 1 && computerChoice === 3) ||  // Rock beats Scissors
+    (userChoice === 2 && computerChoice === 1) ||  // Paper beats Rock
+    (userChoice === 3 && computerChoice === 2)     // Scissors beats Paper
+  ) {
     showWinner.textContent = "User Wins!";
-    console.log("User Wins!");
     humanScore += 1;
   } else {
-    showWinner.textContent = "It's a tie!";
-    console.log("It's a tie!");
+    showWinner.textContent = "Computer Wins!";
+    computerScore += 1;
   }
 
   rpsChoiceDIV.appendChild(showWinner);
