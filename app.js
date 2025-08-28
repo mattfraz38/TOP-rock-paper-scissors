@@ -2,6 +2,11 @@
 
 let humanScore = 0;
 let computerScore = 0;
+let bestOfFiveGame = false;
+let singlePlayGame = false;
+let roundCounter = 0;
+let maxRounds = 5;
+let listenersAttached = false;
 
 /*******************/
 /***  Selectors  ***/
@@ -37,37 +42,65 @@ rpsChoiceQuestion.style.display = "none";
 
 // Reset the DOM so you can play again
 playAgainButton.addEventListener("click", () => {
-  location.reload();
+  if (singlePlayGame) {
+    location.reload();
+  } else {
+    displayChoices();
+    if (roundCounter === 5) {
+      location.reload();
+    }
+  }
 });
+
+playBestOfFiveGameButton.addEventListener("click", () => {
+  bestOfFiveGame = true;
+  if (roundCounter === 5) {
+    bestOfFiveGame = false;
+  }
+});
+
+function startGame() {
+  gameTypeDiv.style.display = "none";
+  rpsChoiceQuestion.style.display = "block";
+  displayChoices();
+  getHumanChoice();
+}
 
 /*******************/
 /*** Single Play ***/
 /*******************/
 
 // Choose what type of game you want to play
-Array.from(gameTypes).forEach((button) => {
-  button.addEventListener("click", (e) => {
-    gameTypeDiv.style.display = "none";
-    rpsChoiceQuestion.style.display = "block";
-    displayChoices();
-    console.log(`PC: ${getComputerChoice()}\nUser: ${getHumanChoice()}`);
+const singlePlayGameType = () => {
+  Array.from(gameTypes).forEach((button) => {
+    button.addEventListener("click", (e) => {
+      if (e.target.textContent === "Single Play") {
+        singlePlayGame = true;
+      } else {
+        bestOfFiveGame = true;
+        bestOfFiveGameType();
+      }
+
+      gameTypeDiv.style.display = "none";
+      rpsChoiceQuestion.style.display = "block";
+      displayChoices();
+      startGame();
+    });
   });
-});
+};
 
 /********************/
 /*** Best of Five ***/
 /********************/
 
-playBestOfFiveGameButton.addEventListener("click", () => {
-
-});
-// play five rounds of rock, paper, scissors
-// for (let i = 0; i < 5; i++) {
-//   playRound(getComputerChoice(), getHumanChoice());
-// }
-
-// alert the user of the final score after five rounds
-// alert(`User Score: ${humanScore}\nComputer Score: ${computerScore}`);
+singlePlayGameType();
+const bestOfFiveGameType = () => {
+  if (bestOfFiveGame) {
+    gameTypeDiv.style.display = "none";
+    displayChoices();
+    getHumanChoice();
+  }
+};
 
 /***********************/
 /* Create New Elements */
@@ -82,11 +115,11 @@ const results = document.createElement("div");
 
 // Generate a random number between 1 and 3 to represent the choices "Rock",
 // "Scissors", or "Paper" then return that number value
-let getComputerChoice = () => {
+function getComputerChoice() {
   let randomNumber = Math.ceil(Math.random() * 3);
   console.log(`getComputerChoice: ${randomNumber}`);
   return randomNumber;
-};
+}
 
 /************************/
 /*** Display Elements ***/
@@ -107,10 +140,13 @@ function showPlayAgainButton() {
 /*** Game Play Moves ***/
 /***********************/
 
-// Cannot be an arrow function because hoisting
 function getHumanChoice() {
+  if (listenersAttached) return; // prevent duplicates
+  listenersAttached = true;
+
   choices.forEach((choice) => {
     choice.addEventListener("click", (e) => {
+
       let humanChoice;
       switch (e.target.textContent.toLowerCase()) {
         case "rock":
@@ -129,9 +165,6 @@ function getHumanChoice() {
   });
 };
 
-results.textContent = `User Score: ${humanScore}\nComputer Score: ${computerScore}`;
-body.appendChild(results);
-
 /************************/
 /*** Calculate Winner ***/
 /************************/
@@ -141,23 +174,36 @@ body.appendChild(results);
 function playRound(computerChoice, userChoice) {
   const showWinner = document.createElement("h2");
   showWinner.textContent = "";
-  rpsChoiceQuestion.style.display = "none";
-  hideRPSChoices();
 
   if (computerChoice > userChoice) {
     showWinner.textContent = "Computer Wins!";
-    rpsChoiceDIV.appendChild(showWinner);
     console.log("Computer Wins!");
     computerScore += 1;
   } else if (userChoice > computerChoice) {
     showWinner.textContent = "User Wins!";
-    rpsChoiceDIV.appendChild(showWinner);
     console.log("User Wins!");
     humanScore += 1;
   } else {
     showWinner.textContent = "It's a tie!";
-    rpsChoiceDIV.appendChild(showWinner);
     console.log("It's a tie!");
+  }
+
+  rpsChoiceDIV.appendChild(showWinner);
+  console.log(`Round ${roundCounter + 1}: ${showWinner.textContent}`);
+  if (bestOfFiveGame) {
+    roundCounter++;
+
+    if (roundCounter === maxRounds) {
+      hideRPSChoices();
+
+      const finalMessage = document.createElement("h2");
+      finalMessage.textContent = `Final Score\nUser: ${humanScore}\nComputer: ${computerScore}`;
+      rpsChoiceDIV.appendChild(finalMessage);
+      showPlayAgainButton();
+    } else {
+      hideRPSChoices();
+      showPlayAgainButton();
+    }
   }
 
   showPlayAgainButton()
